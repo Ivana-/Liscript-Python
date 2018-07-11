@@ -1,0 +1,39 @@
+
+(print "
+Реализация интерпретатора Liscript на Python - версия 0.1.
+Интерпретатор организован в виде РЕПЛа (рид-эвал-принт лупа), который воспринимает ввод либо как команды
+(если введенная строка начинается с символа ':'), либо как выражение для вычисления (во всех остальных случаях).
+
+Команды РЕПЛа:
+
+  :q - выход
+
+  :l filename - загрузить файл скрипта на выполнение
+
+  :tco - переключение флага TCO (оптимизация хвостовой рекурсии)
+
+  :stat - переключение флага вывода статистики (глубина стека и количество вызовов эвал-функции)
+
+  : - повтор последней команды
+
+Ссылки:
+
+  https://github.com/Ivana-/Liscript-GUI-Java-Swing/wiki/Liscript-short-overview - краткое описание языка
+
+  http://liscript.herokuapp.com/ - домашняя страничка проекта
+
+  http://liscript.herokuapp.com/repl - онлайн REPL
+
+  http://liscript.herokuapp.com/bots-about - REPL-боты в различных мессенжерах
+
+  https://github.com/Ivana-/Liscript-GUI-Java-Swing - реализация на Java
+
+  https://github.com/Ivana-/Liscript - реализация на Haskell
+
+  https://github.com/Ivana-/Liscript-1C - реализация на 1С
+
+  https://www.youtube.com/channel/UCNFKlZ6uhl4kWfQyXk-jCvg - серия онлайн-стримов по реализации
+
+  https://ivanov-andrey.itch.io/labyrinth - пример игры на Java-реализации интерпретатора
+")
+

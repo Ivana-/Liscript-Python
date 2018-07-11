@@ -1,0 +1,391 @@
+(def ask-continue "Дальше (Enter): ")
+
+(read \n "Набор демо-примеров (общий обзор). Для продолжения (показа следующего примера) нажмите Enter."
+    \n ask-continue)
+
+
+
+
+(defn Person (name surname address)
+    (lambda (p)
+        (cond (eq? "getname" p) name
+              (eq? "getsurname" p) surname
+              (eq? "getinfo" p) (++ name " " surname ": " address)
+              (read "Неизвестное имя метода: " p \n))))
+(defn find-by-field (f v l) (filter (lambda (p) (eq? v (p f))) l))
+(defn show-person-list (l) (map (lambda (p) (p "getinfo")) l))
+
+(def l (map eval '(
+    (Person "Ivan" "Ivanov" "Moscow, Tverskaya 14")
+    (Person "Anton" "Smirnov" "Omsk, Dunaeva 21")
+    (Person "Andrew" "Ivanov" "Воронеж, Лизюкова 171/37")
+    )))
+(defn test (v l)
+    ++ (++ v "-s:") \n (show-person-list (find-by-field "getsurname" v l)))
+
+(read \n "ЗАДАЧА - функция, выдающая список персон по фамилии." \n
+    "Исходный список:" \n (show-person-list l)
+    \n (test "Ivanov" l)
+    \n (test "Smirnov" l)
+    \n (test "Petrov" l)
+    \n ask-continue)
+
+
+
+
+(defn fib (n) (cond (< n 2) n (+ (fib (- n 1)) (fib (- n 2)) )))
+
+(defn fib-l (n)
+    (defn go (i a b) (cond (<= i 0) a (go (- i 1) b (+ a b)) ))
+    (go n 0 1))
+
+(defn fib-e (n)
+    (defn fib-iter (a b p q count)
+      (cond (= count 0) b
+            (= 0 (mod count 2))
+                (fib-iter a b (+ (* p p) (* q q)) (+ (* q q) (* 2 p q)) (/ count 2) )
+                (fib-iter (+ (* b q) (* a q) (* a p)) (+ (* b p) (* a q)) p q (- count 1)) ))
+    (fib-iter 1 0 0 1 n))
+
+(def n 15)
+(read \n "ЗАДАЧА - функция, вычисляющая число Фибоначчи:" \n
+    "неоптимальным экспоненциальным алгоритмом:" \n "fib[" n "] = " (fib n) \n
+    "более оптимальным линейным алгоритмом:" \n "fib[" n "] = " (fib-l n) \n
+    "волшебным логарифмическим алгоритмом:" \n "fib[" n "] = " (fib-e n) \n ask-continue)
+
+
+
+
+(defn sqrt (x) (
+    (defn sqrt-iter (guess) (cond (good-enough? guess) guess (sqrt-iter (improve guess)) ))
+    (defn good-enough? (guess) (< (abs (- ((lambda (x) (* x x)) guess) x)) 0.000001))
+    (defn improve (guess) (average guess (/ x guess)))
+    (defn average (x y) (/ (+ x y) 2))
+    (defn abs (x) (cond (< x 0) (- 0 x) x))
+    (sqrt-iter 1.0)))
+(def a 4)
+(read \n "ЗАДАЧА - функция, вычисляющая квадратный корень:" \n
+    "квадратный корень из " a " равен " (sqrt a) \n ask-continue)
+
+
+
+
+(defn foo1 (l)
+    (defn go (l s) (cond (null? l) nil (cons (+ s (car l)) (go (cdr l) (+ s (car l))))))
+    (go l 0))
+(defn foo2 (l)
+    (defn go (l s r) (cond (null? l) r (go (cdr l) (+ s (car l)) (cons (+ s (car l)) r))))
+    (reverse (go l 0 nil)))
+(defn foo3 (l)
+    (def s 0)
+    (defn f (x a) (set! s (+ s x)) (cons s a))
+    (reverse (foldl f nil l)))
+(def l '(3 2 6 5 1))
+(read \n "ЗАДАЧА - сформировать список частичных сумм заданного списка:" \n
+    "исходный список: " l \n
+    "результаты:" \n "1: " (foo1 l) \n "2: " (foo2 l) \n "3: " (foo3 l) \n ask-continue)
+
+
+
+
+(defn poly-mul (a b)
+    (defn winfold (l1 l2 acc)
+        (cond (null? l1) acc
+              (null? l2) acc
+              (winfold (cdr l1) (cdr l2) (+ (* (car l1) (car l2)) acc)) ))
+    (defn addzeros (n l) (cond (= 0 n) l (addzeros (- n 1) (cons 0 l)) ))
+    (def la (length a) lb (length b))
+    (def a0 (addzeros (- lb 1) a) b0 (addzeros (+ la lb -2) (reverse b)))
+    (defn go (n a b r) (cond (= 0 n) r (go (- n 1) a (cdr b) (cons (winfold a b 0) r))))
+    (go (+ la lb -1) a0 b0 nil) )
+(defn show-poly (l)
+    (defn go (l i)
+        cond (null? l) ""
+          (++ (cond (> (car l) 0) "+" "")
+          (car l)
+          (cond (= i 0) ""
+                (= i 1) "x"
+                (++ "x^" i))
+          (go (cdr l) (+ i 1))) )
+    (go l 0))
+(def a '(0 1 2 3) b '(5 1 2 3))
+(read \n "ЗАДАЧА - умножение многочленов:" \n
+    (show-poly a) " * " (show-poly b) " = " (show-poly (poly-mul a b)) \n ask-continue)
+
+
+
+
+(defn foo (l)
+    (defn collect (x l)
+        (cond (null? l) (cons (cons x 1) nil)
+              (eq? x (car (car l))) (cons (cons x (+ 1 (car (cdr (car l))))) (cdr l))
+              (cons (car l) (collect x (cdr l))) ))
+    (foldl collect nil l))
+(def l '(h e l l o w o r l d))
+(read \n "ЗАДАЧА - посчитать количество вхождения элементов в список:" \n
+    "входящий список: " l \n
+    "результат: " (foo l) \n ask-continue)
+
+
+
+
+(defn foo (l1 l2)
+    (def l1' (flatten l1))
+    (def l2' (flatten l2))
+    (filter (lambda (x) (noelem x l2')) l1'))
+(def l1 '(-10 (-9 ((-8 -7 -6)) -5 (((-4 -3))) -2 -1) 0 1 2 3 4))
+(def l2 '(5 ((((((-6 -5 -4 -3)))))) ((-8 -7 -6 -5) (((3 4 5 6 7))))))
+(def r (foo l1 l2))
+(read \n "ЗАДАЧА - исключить из первого множества элементы второго:" \n
+    "входящие аргументы функции - списки сложной структуры:" \n l1 \n l2 \n
+    "результат: " \n r \n ask-continue)
+
+
+
+
+(defn derivative (f) (lambda (x) (/ (- (f (+ x 0.001)) (f x) ) 0.001)))
+(defn n-der-1 (g n) (cond (> n 0) (derivative (n-der-1 g (- n 1))) g) )
+(defn n-der-2 (g n) (cond (> n 0) (n-der-2 (derivative g) (- n 1)) g) )
+(defn n-der-3 (f n)
+    (defn iter (i g) (cond (> i 0) (iter (- i 1) (derivative g)) g) )
+    (iter n f))
+(defn f (x) (* x x x x x)) (def n 3) (def x 1)
+(read \n "ЗАДАЧА - сформировать функции - производные n-го порядка исходной функции:" \n
+    "функция: " f \n
+    n "-я производная в точке " x " (вариант 1) = " ((n-der-1 f n) x) \n
+    n "-я производная в точке " x " (вариант 2) = " ((n-der-2 f n) x) \n
+    n "-я производная в точке " x " (вариант 3) = " ((n-der-3 f n) x) \n ask-continue)
+
+
+
+
+(defn tree (n c)
+    (defn st (n v) (cond (< n 1) "" (++ v (st (- n 1) v))))
+    (defn go (i)
+        (def vet (st (- n i) c))
+        (cond (< i 1) \n
+              (++ \n (st i " ") vet "|" vet (go (- i 1))) ))
+    (++ (st n " ") "X" (go (- n 1))) )
+(read \n "ЗАДАЧА - нарисовать 'елочку' заданного размера:" \n \n (tree 15 "@") \n ask-continue)
+
+
+
+
+(defn make-tab (h qual)
+    (def amount (cond (eq? qual low) (+ 12 (* 4 h)) (+ 14 (* 5 h)))) ;переопределяемое поле;
+    (defn dispatch (p)
+        (cond (eq? getamount p) amount
+              (eq? getprice  p) (* (cond (eq? qual low) 2 (eq? qual mid) 3 4) (dispatch getamount))
+              (eq? getinfo   p) (++ "height: " h ", quality: " qual
+                                 ", amount: " (dispatch getamount) ", price: " (dispatch getprice))
+              (eq? setamount (car p)) (set! amount (car (cdr p)))
+              (read (++ "Неизвестное имя метода:" p))))
+    dispatch)
+(defn make-chear (h hb qual)
+    ;родительский объект (с неопределенной высотой);
+    (def tab (make-tab h qual))
+    ;переопределение значения внутреннего поля;
+    (tab (cons setamount (+ (tab getamount) (* 2 hb) 5)))
+    tab)
+(read \n "ЗАДАЧА - создать класс 'табуретка' и дочерний класс 'стул', переопределить поле:" \n
+    "табуретка (20, mid): " ((make-tab 20 mid) getinfo) \n
+    "стул (10, 2, low): " ((make-chear 10 2 low) getinfo) \n ask-continue)
+
+
+
+
+(defn knight (m n)
+    (defn exist-step (a b c)
+        (cond (null? c) false
+              (and (eq? a (car c)) (eq? b (cadr c))) true
+              (exist-step a b (cdr c))))
+
+    (defn next-pos (c)
+        (def p (car c))
+        (def s (filter (lambda (x) (and (<= 1 (car x) m) (<= 1 (cadr x) n)))
+            (map (lambda (x) (cons (+ (car p) (car x)) (+ (cadr p) (cadr x))))
+                 '((2 1) (1 2) (-1 2) (-2 1) (-2 -1) (-1 -2) (1 -2) (2 -1)) )))
+        (filter (lambda (x) (not (exist-step x p c))) s) )
+
+    (defn next-chains (c) (map (lambda (x) (cons x c)) (next-pos c) ))
+
+    (def field-ps (concat (map (lambda (x) (map (lambda (y) (cons x y))
+                               (list-from-to 1 n))) (list-from-to 1 m))))
+    (defn full-chain (c)
+        (and (eq? (car c) '(1 1)) (null? (filter (lambda (x) (not (elem x c))) field-ps))))
+
+    (defn go (c)
+        (def n-c (next-chains c))
+        (cond (full-chain c) c
+              (null? n-c) nil
+              (foldl (lambda (x a) (cond (null? a) (go x) a)) nil n-c) ))
+
+    (go '((1 1)) ))
+
+(defn test (m n) (++ "для поля " m "*" n ":" \n (knight m n) \n ))
+(read \n "ЗАДАЧА - на шахматной доске заданных размеров найти путь коня из стартовой клетки с возвращением в нее же, чтобы конь побывал во всех клетках поля (расчет займет некоторое время)" \n ask-continue)
+(read (test 4 4) (test 4 5) (test 5 5) (test 5 6) ask-continue)
+
+
+
+
+(defn miss-cann (m c)
+
+    (read "------  " m " миссионеров, " c " каннибалов:" \n ask-continue)
+
+    (defn solve-depth (state)
+        (defn go (f)
+            (def vars (steps f))
+            (cond (solved? f) f
+                  (null? vars) nil
+                  (foldl (lambda (x a) (cond (null? a) (go x) a)) nil vars) ))
+        (go state))
+
+    (defn solve-wide (state)
+        ; (print "Количество анализируемых вариантов: ") ;
+        (defn go (vars)
+            ; (print (++ (length vars) " ")) ;
+            (def rezs (filter solved? vars))
+            (cond (null? vars) nil
+                  (not (null? rezs)) rezs
+                  (go (concat (map steps vars))) ))
+        (go (cons state nil)))
+
+    (defn step-var (v state)
+        (match state '((ml cl) (mr cr) boat-left))
+        (def s (cond boat-left 1 -1) dm (* s (car v)) dc (* s (cadr v)))
+        (cons (cons (- ml dm) (- cl dc))
+              (cons (+ mr dm) (+ cr dc)) (not boat-left)) )
+
+    (defn valid? (state)
+        (match state '((ml cl) (mr cr) boat-left))
+        (defn good (m c) not (all id (cons (< 0 m) (< 0 c) (< m c))))
+        (all id (cons (<= 0 ml) (<= 0 cl) (<= 0 mr) (<= 0 cr)
+                (good ml cl) (good mr cr) (< 0 (+ mr cr)) )))
+
+    (defn steps (l)
+        (def nexts (filter valid? (map (lambda (v) step-var v (car l)) vars)))
+        (map (lambda (n) cons n l) (filter (lambda (v) not (elem v l)) nexts)))
+
+    (defn solved? (state) all (lambda (x) = 0 x) (caar state))
+
+    (defn show-res (l)
+        (def rezult (++ \n "Вариант :" \n))
+        (defn n-str (n s) cond (>= 0 n) "" (++ s (n-str (- n 1) s)))
+        (defn m-c (m c) (++ (n-str m "М") (n-str c "К")))
+
+        (defn go (l)
+          (cond (null? l) ""
+            (
+            (match (car l) '((ml cl) (mr cr) boat-left))
+            (set! rezult (++ rezult "Левый: " (m-c ml cl) ", правый: " (m-c mr cr) " - "))
+            (cond (null? (cdr l)) (set! rezult (++ rezult "финиш" \n))
+                (
+                (match (cadr l) '((mln cln) _))
+                (def dm (abs (- ml mln)) dc (abs (- cl cln)))
+                (set! rezult (++ rezult (cond boat-left "туда: " "обратно: ") (m-c dm dc) \n))
+                ))
+            (go (cdr l))
+            )))
+        (go l)
+        rezult)
+
+    ; (def start-state (cons (cons (cons m c) '((0 0) true)) nil)) ;
+    (def start-state (make '(((m c) (0 0) true)) ))
+    ; (print start-state \n) ;
+    (def vars '((1 0) (0 1) (2 0) (0 2) (1 1)) )
+
+    (print
+        \n "Поиск в глубину:" (show-res (reverse (solve-depth start-state)))
+        \n "Поиск в ширину:" \n
+        (foldl (lambda (l a) ++ a (show-res (reverse l))) "" (solve-wide start-state)))
+    )
+
+(print \n "ЗАДАЧА - N миссионеров и N каннибалов должны пересечь реку в лодке, в которой могут поместиться только двое. Миссионеры должны соблюдать осторожность, чтобы каннибалы не получили на каком-либо берегу численное преимущество. Как переплыть реку? Реализация поиска в глубину и в ширину:" \n)
+(miss-cann 2 2)
+(miss-cann 3 3)
+(miss-cann 4 4)
+
+
+
+
+
+(def field '(
+0 0 9 3 0 1 8 0 0
+0 0 0 0 0 0 0 3 0
+2 0 0 0 7 0 0 0 9
+1 0 0 2 0 9 0 0 4
+0 0 4 0 8 0 2 0 0
+8 0 0 7 0 6 0 0 1
+9 0 0 0 1 0 0 0 5
+0 2 0 0 0 0 0 7 0
+0 0 5 6 0 2 4 0 0))
+
+(defn showField (f)
+    (defn go (f)
+        (cond (null? f) ""
+          (++ (foldl (lambda (x a) (++ a x " ")) "" (take 9 f)) \n (go (drop 9 f))) ))
+    (cond (null? f) "Нет решений" (go f)))
+
+(defn steps (field)
+    (defn step-vars (i)
+        (def r (/ i 9) c (mod i 9) rs0 (* 3 (/ r 3)) cs0 (* 3 (/ c 3)))
+        (defn squ-row (n) (take 3 (drop (+ cs0 (* 9 (+ rs0 n))) field)))
+        (defn sieve-nth (l a) (cond (null? l) a (sieve-nth (drop 9 l) (cons (car l) a)) ))
+
+        (foldl (lambda (l a) (filter (lambda (x) (noelem x l)) a) )
+            '(1 2 3 4 5 6 7 8 9)
+            (cons (squ-row 0) (squ-row 1) (sieve-nth (drop c field) (squ-row 2))
+                (take 9 (drop (* 9 r) field)) nil) ))
+
+    (defn rep-by-ind (i e l)
+        (cond (null? l) nil
+              (= 0 i)   (cons e (cdr l))
+                        (cons (car l) (rep-by-ind (- i 1) e (cdr l))) ))
+
+    (defn go (i min-i min-step-counts min-step-vars f)
+        (cond (null? f)
+                  (cond (= min-step-counts 100) (cons field nil)
+                        (= min-step-counts 0)   nil
+                            ( ; (print " i = " min-i ", steps = " min-step-vars \n) ;
+                            (map (lambda (v) (rep-by-ind min-i v field)) min-step-vars)))
+              (= 0 (car f))
+                  ((def i-step-vars (step-vars i) i-step-counts (length i-step-vars))
+                  (cond (< i-step-counts min-step-counts)
+                      (go (+ i 1) i i-step-counts i-step-vars (cdr f))
+                      (go (+ i 1) min-i min-step-counts min-step-vars (cdr f))))
+              (go (+ i 1) min-i min-step-counts min-step-vars (cdr f)) ))
+
+    (go 0 0 100 0 field))
+
+(defn solve-depth (field)
+    (defn go (f)
+        (def vars (steps f))
+        (cond (noelem 0 f) f
+              (null? vars) nil
+              (foldl (lambda (x a) (cond (null? a) (go x) a)) nil vars) ))
+    (go field))
+
+(defn solve-wide (field)
+    ; (print "Количество анализируемых вариантов: ") ;
+    (defn go (vars)
+        ; (print (++ (length vars) " ")) ;
+        (cond (null? vars) nil
+              (noelem 0 (car vars)) vars
+              (go (concat (map steps vars))) ))
+    (go (cons field nil)))
+
+(read \n "ЗАДАЧА - решение судоку, реализация поиска в глубину и в ширину:" \n
+    "Стартовое поле:" \n (showField field) \n
+    "Решение поиском в глубину (расчет займет НЕСКОЛЬКО МИНУТ!)" \n ask-continue)
+
+(read \n (showField (solve-depth field)) \n "Поиск в ширину (расчет займет некоторое время)" \n ask-continue)
+
+(read "А поиск в ширину реализация на Питоне не осиливает (((..." \n ask-continue)
+;
+(def solunions (solve-wide field))
+(read \n "Решения поиском в ширину:" \n
+    (cond (null? solunions) (++ "Нет решений" \n)
+        (foldl (lambda (x a) (++ a (showField x) \n)) "" solunions) ) \n ask-continue)
+;
+(print "Код данных примеров вы можете посмотреть в файле.")
