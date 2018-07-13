@@ -583,7 +583,7 @@ def repl():
 
 
 globalenv = Env({}, None)
-loadfile('standard_library.liscript')
+# loadfile('standard_library.liscript')
 # loadfile('demo2.liscript')
 
-repl()
+# repl()
