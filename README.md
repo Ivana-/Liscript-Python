@@ -1,5 +1,8 @@
 [![Build Status](https://travis-ci.com/Ivana-/Liscript-Python.svg?branch=master)](https://travis-ci.com/Ivana-/Liscript-Python)
 
+.. image:: https://codecov.io/gh/Ivana-/Liscript-Python/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/Ivana-/Liscript-Python
+
 # Liscript-Python
 
 Интерпретатор Liscript на Python. Консольный REPL.
