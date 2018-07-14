@@ -3,4 +3,4 @@ python: 3.6
 cache: pip
 before_install: pip install -U pre-commit
 script: pre-commit run --all-files
-after_success: codecov
+after_success: codecov --token=2aee7cf9-c868-424d-a387-0352fdad93ff
