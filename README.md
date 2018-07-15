@@ -7,7 +7,7 @@
 
 Запуск: `python3 repl.py` , автоматически подгружается стандартная библиотека
 
-Пример интерфейса и простейших команд, детальнее в[краткое описание языка](https://github.com/Ivana-/Liscript-GUI-Java-Swing/wiki/Liscript-short-overview):
+Пример интерфейса и простейших команд, детальнее в  [краткое описание языка](https://github.com/Ivana-/Liscript-GUI-Java-Swing/wiki/Liscript-short-overview):
 ```
 t >>> def x 1
 OK

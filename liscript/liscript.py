@@ -8,7 +8,7 @@ from enum import Enum
 
 def cons(x, y):
     """."""
-    return (x, y)
+    return x, y
 
 
 def car(l):
@@ -21,7 +21,7 @@ def cdr(l):
     return l[1]
 
 
-nil = (None, None)
+nil = None, None
 
 
 class BO(Enum):
@@ -132,50 +132,50 @@ def prsval(s):
 
 def prslist(s):
     """."""
-    (x, ss) = prs(s)
+    x, ss = prs(s)
     if x is None:
-        return (nil, ss)
+        return nil, ss
     else:
-        (t, zz) = prslist(ss)
-        return (cons(x, t), zz)
+        t, zz = prslist(ss)
+        return cons(x, t), zz
 
 
 def prs(ss):
     """."""
     s = ss.lstrip()
     if not s:
-        return (None, '')
+        return None, ''
 
     c, z = s[0], s[1:]
     if c == '(':
         return prslist(z)
     elif c == ')':
-        return (None, z)
+        return None, z
     elif c == '\"':
         try:
-            (a, b) = re.search('\"', z).span()
+            a, b = re.search('\"', z).span()
         except Exception as ex:
             raise ValueError('closed \'\"\' is absent: ' +
                              (s if len(s) < 20 else s[0:20] + '...'))
-        return (z[0:a], z[b:])
+        return z[0:a], z[b:]
     elif c == ';':
         try:
-            (a, b) = re.search(';', z).span()
+            a, b = re.search(';', z).span()
         except Exception as ex:
             raise ValueError('closed \';\' is absent: ' +
                              (s if len(s) < 20 else s[0:20] + '...'))
         return prs(z[b:])
     elif c == '\'':
-        (x, ss) = prs(z)
-        return (cons(SF.QUOTE, cons(x, nil)), ss)
+        x, ss = prs(z)
+        return cons(SF.QUOTE, cons(x, nil)), ss
     else:
-        (a, b) = re.search('\s|\(|\)|\"|;|$', s).span()
-        return (prsval(s[0:a]), s[a:])
+        a, b = re.search('\s|\(|\)|\"|;|$', s).span()
+        return prsval(s[0:a]), s[a:]
 
 
 def parse(s):
     """."""
-    (x, ss) = prs(s)
+    x, ss = prs(s)
     return x if not ss.strip() else cons(x, prslist(ss)[0])
 
 
@@ -250,7 +250,7 @@ def objectsAreEqual(x, y):
     elif isinstance(x, Symbol):
         return x.value == y.value
     elif isinstance(x, tuple):
-        while not x == nil and not y == nil:
+        while x != nil and y != nil:
             if not objectsAreEqual(car(x), car(y)):
                 return False
             x, y = cdr(x), cdr(y)
@@ -341,15 +341,15 @@ def objectEvalToSymbolName(o, e, d):
 
 def getBody(o):
     """."""
-    return car(o) if (isinstance(o, tuple) and not o == nil
+    return car(o) if (isinstance(o, tuple) and o != nil
                       and cdr(o) == nil) else o
 
 
 def getMapNamesValues(ns, bs, e, d, evalFlag):
     """."""
     r = {}
-    while not ns == nil and not bs == nil:
-        if cdr(ns) == nil and not cdr(bs) == nil:
+    while ns != nil and bs != nil:
+        if cdr(ns) == nil and cdr(bs) != nil:
             if evalFlag:
                 m, v = evalListToArray(bs, e, d), nil
                 for x in reversed(m):
@@ -410,7 +410,7 @@ def evalrec(o, e, stacklevel, strict):
         elif isinstance(h, SF):
 
             if h == SF.DEF or h == SF.SET:
-                while not t == nil and not cdr(t) == nil:
+                while t != nil and cdr(t) != nil:
                     s, v = objectEvalToSymbolName(car(t), e, d), evalrec(
                         car(cdr(t)), e, d, True)
                     e.defvar(s, v) if h == SF.DEF else e.setvar(s, v)
@@ -443,7 +443,7 @@ def evalrec(o, e, stacklevel, strict):
                 return cdr(a) if isinstance(a, tuple) else nil
 
             elif h == SF.COND:
-                while not t == nil and not cdr(t) == nil:
+                while t != nil and cdr(t) != nil:
                     if evalrec(car(t), e, d, True):
                         return evalrec(car(cdr(t)), e, d, strict)
                     t = cdr(cdr(t))
