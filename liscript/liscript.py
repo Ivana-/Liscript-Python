@@ -1,27 +1,105 @@
 """This module."""
 
 import re
+import types  # only if cons/car/cdr done as lambdas
 from enum import Enum
 
-# TYPES / ENUMS
+# CONS / CAR / CDR
+
+
+# 1-st variant
+
+
+# def cons(x, y):
+#     """."""
+#     return x, y
+
+
+# def car(l):
+#     """."""
+#     return l[0]
+
+
+# def cdr(l):
+#     """."""
+#     return l[1]
+
+
+# def isnull(t):
+#     """."""
+#     return t == nil
+
+
+# conslistClass = tuple
+
+
+# 2-nd variant
+
+
+# class ConsList:
+#     """."""
+
+#     def __init__(self, x, y):
+#         """."""
+#         self.car, self.cdr = x, y
+
+
+# def cons(x, y):
+#     """."""
+#     return ConsList(x, y)
+
+
+# def car(l):
+#     """."""
+#     return l.car
+
+
+# def cdr(l):
+#     """."""
+#     return l.cdr
+
+
+# def isnull(t):
+#     """."""
+#     return t.car is None and t.cdr is None
+
+
+# conslistClass = ConsList
+
+
+# 3-rd variant
 
 
 def cons(x, y):
     """."""
-    return x, y
+    return lambda f: f(x, y)
 
 
 def car(l):
     """."""
-    return l[0]
+    return l(lambda x, y: x)
 
 
 def cdr(l):
     """."""
-    return l[1]
+    return l(lambda x, y: y)
 
 
-nil = None, None
+def isnull(t):
+    """."""
+    return car(t) is None and cdr(t) is None
+
+
+conslistClass = types.FunctionType
+
+
+# nil is allways the same :)
+
+
+nil = cons(None, None)
+
+
+# TYPES / ENUMS
 
 
 class BO(Enum):
@@ -181,9 +259,9 @@ def parse(s):
 
 def show(o):
     """."""
-    if isinstance(o, tuple):
+    if isinstance(o, conslistClass):
         r = ''
-        while o != nil:
+        while not isnull(o):
             r, o = r + ' ' + show(car(o)), cdr(o)
         return '(' + r.lstrip() + ')'
     elif o in keywords_vk:
@@ -249,12 +327,12 @@ def objectsAreEqual(x, y):
         return False
     elif isinstance(x, Symbol):
         return x.value == y.value
-    elif isinstance(x, tuple):
-        while x != nil and y != nil:
+    elif isinstance(x, conslistClass):
+        while not isnull(x) and not isnull(y):
             if not objectsAreEqual(car(x), car(y)):
                 return False
             x, y = cdr(x), cdr(y)
-        return x == nil and y == nil
+        return isnull(x) and isnull(y)
     else:
         return x == y
 
@@ -280,10 +358,10 @@ def bo(op, a, b):
 
 def foldbo(op, t, e, d):
     """."""
-    if t == nil:
+    if isnull(t):
         raise ValueError('no operands for ariphmetic operation: ' + op)
     r, t = evalrec(car(t), e, d, True), cdr(t)
-    while t != nil:
+    while not isnull(t):
         r, t = bo(op, r, evalrec(car(t), e, d, True)), cdr(t)
     return r
 
@@ -308,10 +386,10 @@ def bp(op, a, b):
 
 def foldbp(op, t, e, d):
     """."""
-    if t == nil:
+    if isnull(t):
         return True
     a, t = evalrec(car(t), e, d, True), cdr(t)
-    while t != nil:
+    while not isnull(t):
         b = evalrec(car(t), e, d, True)
         if not bp(op, a, b):
             return False
@@ -322,7 +400,7 @@ def foldbp(op, t, e, d):
 def evalListToArray(t, e, d):
     """."""
     m = []
-    while t != nil:
+    while not isnull(t):
         m.append(evalrec(car(t), e, d, True))
         t = cdr(t)
     return m
@@ -341,15 +419,15 @@ def objectEvalToSymbolName(o, e, d):
 
 def getBody(o):
     """."""
-    return car(o) if (isinstance(o, tuple) and o != nil
-                      and cdr(o) == nil) else o
+    return car(o) if (isinstance(o, conslistClass) and not isnull(o)
+                      and isnull(cdr(o))) else o
 
 
 def getMapNamesValues(ns, bs, e, d, evalFlag):
     """."""
     r = {}
-    while ns != nil and bs != nil:
-        if cdr(ns) == nil and cdr(bs) != nil:
+    while not isnull(ns) and not isnull(bs):
+        if isnull(cdr(ns)) and not isnull(cdr(bs)):
             if evalFlag:
                 m, v = evalListToArray(bs, e, d), nil
                 for x in reversed(m):
@@ -366,8 +444,8 @@ def macroSubst(body, kv):
     """."""
     if isinstance(body, Symbol):
         return kv.get(body.value, body)
-    elif isinstance(body, tuple):
-        return nil if body == nil else cons(
+    elif isinstance(body, conslistClass):
+        return nil if isnull(body) else cons(
             macroSubst(car(body), kv), macroSubst(cdr(body), kv))
     else:
         return body
@@ -380,7 +458,7 @@ def macroexpand(m, t, e, d):
 
 def getTypeName(o):
     """."""
-    return 'ConsList' if isinstance(o, tuple) else type(o).__name__
+    return 'ConsList' if isinstance(o, conslistClass) else type(o).__name__
 
 
 # EVAL recursive
@@ -397,11 +475,11 @@ def evalrec(o, e, stacklevel, strict):
 
     if isinstance(o, Symbol):
         return e.getvar(o.value, o)
-    elif isinstance(o, tuple):
-        if o == nil:
+    elif isinstance(o, conslistClass):
+        if isnull(o):
             return o
         t = cdr(o)
-        h = evalrec(car(o), e, d, strict if t == nil else True)
+        h = evalrec(car(o), e, d, strict if isnull(t) else True)
 
         if isinstance(h, BO):
             return foldbo(h, t, e, d)
@@ -410,7 +488,7 @@ def evalrec(o, e, stacklevel, strict):
         elif isinstance(h, SF):
 
             if h == SF.DEF or h == SF.SET:
-                while t != nil and cdr(t) != nil:
+                while not isnull(t) and not isnull(cdr(t)):
                     s, v = objectEvalToSymbolName(car(t), e, d), evalrec(
                         car(cdr(t)), e, d, True)
                     e.defvar(s, v) if h == SF.DEF else e.setvar(s, v)
@@ -430,24 +508,24 @@ def evalrec(o, e, stacklevel, strict):
             elif h == SF.CONS:
                 m, v, lst = evalListToArray(t, e, d), nil, True
                 for x in reversed(m):
-                    v, lst = x if lst and isinstance(x, tuple) else cons(
-                        x, v), False
+                    v, lst = x if lst and isinstance(
+                        x, conslistClass) else cons(x, v), False
                 return v
 
             elif h == SF.CAR:
                 a = evalrec(car(t), e, d, True)
-                return car(a) if isinstance(a, tuple) else a
+                return car(a) if isinstance(a, conslistClass) else a
 
             elif h == SF.CDR:
                 a = evalrec(car(t), e, d, True)
-                return cdr(a) if isinstance(a, tuple) else nil
+                return cdr(a) if isinstance(a, conslistClass) else nil
 
             elif h == SF.COND:
-                while t != nil and cdr(t) != nil:
+                while not isnull(t) and not isnull(cdr(t)):
                     if evalrec(car(t), e, d, True):
                         return evalrec(car(cdr(t)), e, d, strict)
                     t = cdr(cdr(t))
-                return nil if t == nil else evalrec(car(t), e, d, strict)
+                return nil if isnull(t) else evalrec(car(t), e, d, strict)
 
             elif h == SF.PRINT or h == SF.READ:
                 m, s = evalListToArray(t, e, d), ''
@@ -499,9 +577,9 @@ def evalrec(o, e, stacklevel, strict):
             return evalrec(macroexpand(h, t, e, d), e, d, True)
         else:
             v = h
-            while t != nil:
+            while not isnull(t):
                 v, t = evalrec(
-                    car(t), e, d, strict if cdr(t) == nil else True), cdr(t)
+                    car(t), e, d, strict if isnull(cdr(t)) else True), cdr(t)
             return v
     else:
         return o

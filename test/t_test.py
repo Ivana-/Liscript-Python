@@ -3,7 +3,7 @@
 import unittest
 
 from liscript.liscript import (SF, car, cdr, cons, evalrec, globalenv,
-                               loadfile, nil, parse, show)
+                               loadfile, nil, objectsAreEqual, parse, show)
 
 
 class TestConsCarCdr(unittest.TestCase):
@@ -14,7 +14,7 @@ class TestConsCarCdr(unittest.TestCase):
         self.assertEqual(car(cons(1, 2)), 1)
         self.assertEqual(cdr(cons(1, 2)), 2)
         self.assertEqual(car(car(cons(cons(1, 2), 3))), 1)
-        self.assertEqual(cdr(cons(0, cons(1, 2))), cons(1, 2))
+        self.assertEqual(cdr(cdr(cons(0, cons(1, 2)))), 2)
         self.assertEqual(car(cdr(cons(0, cons(1, 2)))), 1)
 
 
@@ -25,22 +25,23 @@ class TestParse(unittest.TestCase):
         """."""
         self.assertEqual(parse('  '), None)
         self.assertEqual(parse(')'), None)
-        self.assertEqual(parse('()'), nil)
+        self.assertTrue(objectsAreEqual(parse('()'), nil))
 
         self.assertEqual(parse(' 1 '), 1)
         self.assertEqual(parse(' 1.1 '), 1.1)
         self.assertEqual(parse("\"1.1\""), '1.1')
         self.assertEqual(parse("\"a;bc;d\""), 'a;bc;d')
 
-        self.assertEqual(parse("'1.1"), cons(SF.QUOTE, cons(1.1, nil)))
+        self.assertTrue(objectsAreEqual(parse("'1.1"),
+                                        cons(SF.QUOTE, cons(1.1, nil))))
 
         v = cons(1, cons(2, nil))
-        self.assertEqual(parse(' 1 2 '), v)
-        self.assertEqual(parse(' (1 2) '), v)
-        self.assertEqual(parse(" 1;ghg\" bz zbsfb\" sd;2 "), v)
-        self.assertEqual(parse(' 1\n2 '), v)
-        self.assertEqual(parse(' (1 2 '), v)
-        self.assertEqual(parse(' 1 2))))) '), v)
+        self.assertTrue(objectsAreEqual(parse(' 1 2 '), v))
+        self.assertTrue(objectsAreEqual(parse(' (1 2) '), v))
+        self.assertTrue(objectsAreEqual(parse(" 1;ghg\" bz zbsfb\" sd;2 "), v))
+        self.assertTrue(objectsAreEqual(parse(' 1\n2 '), v))
+        self.assertTrue(objectsAreEqual(parse(' (1 2 '), v))
+        self.assertTrue(objectsAreEqual(parse(' 1 2))))) '), v))
 
 
 class TestShow(unittest.TestCase):
@@ -65,7 +66,8 @@ class TestEvalLisp(unittest.TestCase):
 
         loadfile('standard_library.liscript')
 
-        self.assertEqual(__eval("cdr '(0 1 2)"), cons(1, cons(2, nil)))
+        self.assertTrue(objectsAreEqual(__eval("cdr '(0 1 2)"),
+                                        cons(1, cons(2, nil))))
         self.assertEqual(__evalshow("cdr '(0 1 2)"), '(1 2)')
         self.assertEqual(__evalshow('def l (list-from-to 1 5)'), 'OK')
         self.assertEqual(__evalshow('l'), '(1 2 3 4 5)')
