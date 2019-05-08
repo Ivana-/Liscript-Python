@@ -8,15 +8,15 @@
   - id: debug-statements
   - id: double-quote-string-fixer
   - id: end-of-file-fixer
-  - id: flake8
+  # - id: flake8
   - id: name-tests-test
   - id: requirements-txt-fixer
   - id: trailing-whitespace
 
-- repo: git://github.com/chewse/pre-commit-mirrors-pydocstyle
-  sha: v2.1.1
-  hooks:
-  - id: pydocstyle
+# - repo: git://github.com/chewse/pre-commit-mirrors-pydocstyle
+#   sha: v2.1.1
+#   hooks:
+#   - id: pydocstyle
 
 - repo: https://github.com/pre-commit/mirrors-isort
   sha: v4.3.4

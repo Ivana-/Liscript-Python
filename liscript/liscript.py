@@ -8,94 +8,30 @@ from enum import Enum
 
 
 # 1-st variant
-
-
-# def cons(x, y):
-#     """."""
-#     return x, y
-
-
-# def car(l):
-#     """."""
-#     return l[0]
-
-
-# def cdr(l):
-#     """."""
-#     return l[1]
-
-
-# def isnull(t):
-#     """."""
-#     return t == nil
-
-
+# def cons(x, y): return x, y
+# def car(l):     return l[0]
+# def cdr(l):     return l[1]
+# def isnull(t):  return t == nil
 # conslistClass = tuple
 
-
 # 2-nd variant
-
-
 # class ConsList:
-#     """."""
+#     def __init__(self, x, y): self.car, self.cdr = x, y
 
-#     def __init__(self, x, y):
-#         """."""
-#         self.car, self.cdr = x, y
-
-
-# def cons(x, y):
-#     """."""
-#     return ConsList(x, y)
-
-
-# def car(l):
-#     """."""
-#     return l.car
-
-
-# def cdr(l):
-#     """."""
-#     return l.cdr
-
-
-# def isnull(t):
-#     """."""
-#     return t.car is None and t.cdr is None
-
-
+# def cons(x, y): return ConsList(x, y)
+# def car(l):     return l.car
+# def cdr(l):     return l.cdr
+# def isnull(t):  return t.car is None and t.cdr is None
 # conslistClass = ConsList
 
-
 # 3-rd variant
-
-
-def cons(x, y):
-    """."""
-    return lambda f: f(x, y)
-
-
-def car(l):
-    """."""
-    return l(lambda x, y: x)
-
-
-def cdr(l):
-    """."""
-    return l(lambda x, y: y)
-
-
-def isnull(t):
-    """."""
-    return car(t) is None and cdr(t) is None
-
-
+def cons(x, y): return lambda f: f(x, y)
+def car(l):     return l(lambda x, y: x)
+def cdr(l):     return l(lambda x, y: y)
+def isnull(t):  return car(t) is None and cdr(t) is None
 conslistClass = types.FunctionType
 
-
 # nil is allways the same :)
-
-
 nil = cons(None, None)
 
 
@@ -103,23 +39,14 @@ nil = cons(None, None)
 
 
 class BO(Enum):
-    """."""
-
     ADD, SUB, MUL, DIV, MOD, SCONCAT = range(6)
 
-
 class BP(Enum):
-    """."""
-
     GT, GTE, LT, LTE, EQ, NOEQ = range(6)
 
-
 class SF(Enum):
-    """."""
-
     (DEF, SET, GET, QUOTE, TYPEOF, CONS, CAR, CDR, COND, PRINT, READ, EVAL,
      EVALIN, LAMBDA, MACRO, MACROEXPAND) = range(16)
-
 
 keywords_kv = {
     '+': BO.ADD,
@@ -154,36 +81,20 @@ keywords_kv = {
 
 keywords_vk = dict(zip(keywords_kv.values(), keywords_kv.keys()))
 
-
 class Symbol:
-    """."""
-
     def __init__(self, s):
-        """."""
         self.value = s
 
-
 class Lambda:
-    """."""
-
     def __init__(self, a, b, e):
-        """."""
         self.args, self.body, self.env = a, b, e
 
-
 class Macro:
-    """."""
-
     def __init__(self, a, b):
-        """."""
         self.args, self.body = a, b
 
-
 class LambdaCall:
-    """."""
-
     def __init__(self, l, fr):
-        """."""
         self.lam, self.frame = l, fr
 
 
@@ -191,7 +102,6 @@ class LambdaCall:
 
 
 def prsval(s):
-    """."""
     if s == 'true':
         return True
     elif s == 'false':
@@ -201,15 +111,14 @@ def prsval(s):
     else:
         try:
             return int(s)
-        except Exception as ex:
+        except Exception: # as ex:
             try:
                 return float(s)
-            except Exception as ex:
+            except Exception:
                 return Symbol(s)
 
 
 def prslist(s):
-    """."""
     x, ss = prs(s)
     if x is None:
         return nil, ss
@@ -219,7 +128,6 @@ def prslist(s):
 
 
 def prs(ss):
-    """."""
     s = ss.lstrip()
     if not s:
         return None, ''
@@ -232,14 +140,14 @@ def prs(ss):
     elif c == '\"':
         try:
             a, b = re.search('\"', z).span()
-        except Exception as ex:
+        except Exception: # as ex:
             raise ValueError('closed \'\"\' is absent: ' +
                              (s if len(s) < 20 else s[0:20] + '...'))
         return z[0:a], z[b:]
     elif c == ';':
         try:
             a, b = re.search(';', z).span()
-        except Exception as ex:
+        except Exception: # as ex:
             raise ValueError('closed \';\' is absent: ' +
                              (s if len(s) < 20 else s[0:20] + '...'))
         return prs(z[b:])
@@ -252,13 +160,11 @@ def prs(ss):
 
 
 def parse(s):
-    """."""
     x, ss = prs(s)
     return x if not ss.strip() else cons(x, prslist(ss)[0])
 
 
 def show(o):
-    """."""
     if isinstance(o, conslistClass):
         r = ''
         while not isnull(o):
@@ -286,14 +192,10 @@ def show(o):
 
 
 class Env:
-    """."""
-
     def __init__(self, m, p):
-        """."""
         self.frame, self.parent = m, p
 
     def setvar(self, k, v):
-        """."""
         e = self
         while e is not None:
             if k in e.frame:
@@ -302,7 +204,6 @@ class Env:
             e = e.parent
 
     def getvar(self, k, s):
-        """."""
         e = self
         while e is not None:
             if k in e.frame:
@@ -311,7 +212,6 @@ class Env:
         return s if isinstance(s, Symbol) else Symbol(k)
 
     def defvar(self, k, v):
-        """."""
         self.frame[k] = v
 
 
@@ -319,7 +219,6 @@ class Env:
 
 
 def objectsAreEqual(x, y):
-    """."""
     if isinstance(x, (int, float, complex)) and isinstance(
             y, (int, float, complex)):
         return x == y
@@ -338,26 +237,16 @@ def objectsAreEqual(x, y):
 
 
 def bo(op, a, b):
-    """."""
-    if op == BO.ADD:
-        return a + b
-    elif op == BO.SUB:
-        return a - b
-    elif op == BO.MUL:
-        return a * b
-    elif op == BO.DIV:
-        return a / b
-    elif op == BO.MOD:
-        return a % b
-    elif op == BO.SCONCAT:
-        return (a if isinstance(a, str) else show(a)) + (b if isinstance(
-            b, str) else show(b))
-    else:
-        return None
+    if   op == BO.ADD: return a + b
+    elif op == BO.SUB: return a - b
+    elif op == BO.MUL: return a * b
+    elif op == BO.DIV: return a / b
+    elif op == BO.MOD: return a % b
+    elif op == BO.SCONCAT: return (a if isinstance(a, str) else show(a)) + (b if isinstance(b, str) else show(b))
+    else: return None
 
 
 def foldbo(op, t, e, d):
-    """."""
     if isnull(t):
         raise ValueError('no operands for ariphmetic operation: ' + op)
     r, t = evalrec(car(t), e, d, True), cdr(t)
@@ -367,25 +256,16 @@ def foldbo(op, t, e, d):
 
 
 def bp(op, a, b):
-    """."""
-    if op == BP.GT:
-        return a > b
-    elif op == BP.GTE:
-        return a >= b
-    elif op == BP.LT:
-        return a < b
-    elif op == BP.LTE:
-        return a <= b
-    elif op == BP.EQ:
-        return objectsAreEqual(a, b)  # a == b
-    elif op == BP.NOEQ:
-        return not objectsAreEqual(a, b)  # a != b
-    else:
-        return None
+    if   op == BP.GT:   return a > b
+    elif op == BP.GTE:  return a >= b
+    elif op == BP.LT:   return a < b
+    elif op == BP.LTE:  return a <= b
+    elif op == BP.EQ:   return objectsAreEqual(a, b)  # a == b
+    elif op == BP.NOEQ: return not objectsAreEqual(a, b)  # a != b
+    else:               return None
 
 
 def foldbp(op, t, e, d):
-    """."""
     if isnull(t):
         return True
     a, t = evalrec(car(t), e, d, True), cdr(t)
@@ -398,7 +278,6 @@ def foldbp(op, t, e, d):
 
 
 def evalListToArray(t, e, d):
-    """."""
     m = []
     while not isnull(t):
         m.append(evalrec(car(t), e, d, True))
@@ -407,7 +286,6 @@ def evalListToArray(t, e, d):
 
 
 def objectEvalToSymbolName(o, e, d):
-    """."""
     if isinstance(o, Symbol):
         return o.value
     elif isinstance(o, str):
@@ -418,13 +296,11 @@ def objectEvalToSymbolName(o, e, d):
 
 
 def getBody(o):
-    """."""
     return car(o) if (isinstance(o, conslistClass) and not isnull(o)
                       and isnull(cdr(o))) else o
 
 
 def getMapNamesValues(ns, bs, e, d, evalFlag):
-    """."""
     r = {}
     while not isnull(ns) and not isnull(bs):
         if isnull(cdr(ns)) and not isnull(cdr(bs)):
@@ -441,23 +317,19 @@ def getMapNamesValues(ns, bs, e, d, evalFlag):
 
 
 def macroSubst(body, kv):
-    """."""
     if isinstance(body, Symbol):
         return kv.get(body.value, body)
     elif isinstance(body, conslistClass):
-        return nil if isnull(body) else cons(
-            macroSubst(car(body), kv), macroSubst(cdr(body), kv))
+        return nil if isnull(body) else cons(macroSubst(car(body), kv), macroSubst(cdr(body), kv))
     else:
         return body
 
 
 def macroexpand(m, t, e, d):
-    """."""
     return macroSubst(m.body, getMapNamesValues(m.args, t, e, d, False))
 
 
 def getTypeName(o):
-    """."""
     return 'ConsList' if isinstance(o, conslistClass) else type(o).__name__
 
 
@@ -468,10 +340,8 @@ symbolOK = Symbol('OK')
 
 
 def evalrec(o, e, stacklevel, strict):
-    """."""
     global evalCalls, maxStack
-    evalCalls, maxStack, d = evalCalls + \
-        1, max(maxStack, stacklevel + 1), stacklevel + 1
+    evalCalls, maxStack, d = evalCalls + 1, max(maxStack, stacklevel + 1), stacklevel + 1
 
     if isinstance(o, Symbol):
         return e.getvar(o.value, o)
@@ -489,8 +359,7 @@ def evalrec(o, e, stacklevel, strict):
 
             if h == SF.DEF or h == SF.SET:
                 while not isnull(t) and not isnull(cdr(t)):
-                    s, v = objectEvalToSymbolName(car(t), e, d), evalrec(
-                        car(cdr(t)), e, d, True)
+                    s, v = objectEvalToSymbolName(car(t), e, d), evalrec(car(cdr(t)), e, d, True)
                     e.defvar(s, v) if h == SF.DEF else e.setvar(s, v)
                     t = cdr(cdr(t))
                 return symbolOK
@@ -508,8 +377,7 @@ def evalrec(o, e, stacklevel, strict):
             elif h == SF.CONS:
                 m, v, lst = evalListToArray(t, e, d), nil, True
                 for x in reversed(m):
-                    v, lst = x if lst and isinstance(
-                        x, conslistClass) else cons(x, v), False
+                    v, lst = x if lst and isinstance(x, conslistClass) else cons(x, v), False
                 return v
 
             elif h == SF.CAR:
@@ -542,8 +410,7 @@ def evalrec(o, e, stacklevel, strict):
 
             elif h == SF.EVALIN:
                 a = evalrec(car(t), e, d, True)
-                return evalrec(getBody(cdr(t)), a.env, d, True) if isinstance(
-                    a, Lambda) else None
+                return evalrec(getBody(cdr(t)), a.env, d, True) if isinstance(a, Lambda) else None
 
             elif h == SF.LAMBDA:
                 return Lambda(car(t), getBody(cdr(t)), e)
@@ -553,33 +420,28 @@ def evalrec(o, e, stacklevel, strict):
 
             elif h == SF.MACROEXPAND:
                 a = evalrec(car(t), e, d, True)
-                return macroexpand(a, cdr(t), e,
-                                   d) if isinstance(a, Macro) else None
+                return macroexpand(a, cdr(t), e, d) if isinstance(a, Macro) else None
 
             else:
                 raise ValueError('Unrecognized special form \'' + h + '\'')
-                return None
+                # return None
 
         elif isinstance(h, Lambda):
             if not TCOFlag:
                 return evalrec(
-                    h.body, Env(
-                        getMapNamesValues(h.args, t, e, d, True), h.env), d,
-                    True)
+                    h.body, Env(getMapNamesValues(h.args, t, e, d, True), h.env), d, True)
             else:
                 v = LambdaCall(h, getMapNamesValues(h.args, t, e, d, True))
                 if strict:
                     while isinstance(v, LambdaCall):
-                        v = evalrec(v.lam.body, Env(v.frame, v.lam.env), d,
-                                    False)
+                        v = evalrec(v.lam.body, Env(v.frame, v.lam.env), d, False)
                 return v
         elif isinstance(h, Macro):
             return evalrec(macroexpand(h, t, e, d), e, d, True)
         else:
             v = h
             while not isnull(t):
-                v, t = evalrec(
-                    car(t), e, d, strict if isnull(cdr(t)) else True), cdr(t)
+                v, t = evalrec(car(t), e, d, strict if isnull(cdr(t)) else True), cdr(t)
             return v
     else:
         return o
@@ -589,7 +451,6 @@ def evalrec(o, e, stacklevel, strict):
 
 
 def evallisp(s):
-    """."""
     global evalCalls, maxStack
     evalCalls, maxStack = 0, 0
     try:
@@ -610,7 +471,6 @@ def evallisp(s):
 
 
 def loadfile(filename):
-    """."""
     try:
         with open(filename) as f:
             s = f.read()
@@ -621,7 +481,6 @@ def loadfile(filename):
 
 
 def replcmd(s):
-    """."""
     global TCOFlag, showStatFlag
     m = s.split()
     cmd = m[0]
@@ -640,9 +499,7 @@ def replcmd(s):
 
 
 def evalinput(s):
-    """."""
-    if s:
-        replcmd(s) if s[0] == ':' else evallisp(s)
+    if s: replcmd(s) if s[0] == ':' else evallisp(s)
 
 
 lastInput = ''
@@ -650,7 +507,6 @@ globalenv = Env({}, None)
 
 
 def repl():
-    """."""
     global lastInput
     loadfile('standard_library.liscript')
     # loadfile('demo2.liscript')
