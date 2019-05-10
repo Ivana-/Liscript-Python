@@ -1,4 +1,4 @@
-"""This module."""
+"""Lesson 4"""
 
 import re
 import types  # only if cons/car/cdr done as lambdas
@@ -516,6 +516,7 @@ globalenv = Env({}, None)
 
 def repl():
     global lastInput
+    print('Lesson 4  - Macro & repl commands & standard library ------- TCO & eval-in & different cons variants & etc.')
     loadfile('standard_library.liscript')
     # loadfile('demo2.liscript')
     while True:

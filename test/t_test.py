@@ -7,10 +7,7 @@ from liscript.liscript import (SF, car, cdr, cons, evalrec, globalenv,
 
 
 class TestConsCarCdr(unittest.TestCase):
-    """."""
-
     def test_carcdr(self):
-        """."""
         self.assertEqual(car(cons(1, 2)), 1)
         self.assertEqual(cdr(cons(1, 2)), 2)
         self.assertEqual(car(car(cons(cons(1, 2), 3))), 1)
@@ -19,10 +16,7 @@ class TestConsCarCdr(unittest.TestCase):
 
 
 class TestParse(unittest.TestCase):
-    """."""
-
     def test_parse(self):
-        """."""
         self.assertEqual(parse('  '), None)
         self.assertEqual(parse(')'), None)
         self.assertTrue(objectsAreEqual(parse('()'), nil))
@@ -45,19 +39,13 @@ class TestParse(unittest.TestCase):
 
 
 class TestShow(unittest.TestCase):
-    """."""
-
     def test_show(self):
-        """."""
         self.assertEqual(show(nil), '()')
         self.assertEqual(show(cons(1, cons(2, nil))), '(1 2)')
 
 
 class TestEvalLisp(unittest.TestCase):
-    """."""
-
     def test_evallisp(self):
-        """."""
         def __eval(s): return evalrec(parse(s), globalenv, 0, True)
 
         def __evalshow(s): return show(__eval(s))
@@ -75,19 +63,14 @@ class TestEvalLisp(unittest.TestCase):
 
 
 class TestStringMethods(unittest.TestCase):
-    """."""
-
     def test_upper(self):
-        """."""
         self.assertEqual('foo'.upper(), 'FOO')
 
     def test_isupper(self):
-        """."""
         self.assertTrue('FOO'.isupper())
         self.assertFalse('Foo'.isupper())
 
     def test_split(self):
-        """."""
         s = 'hello world'
         self.assertEqual(s.split(), ['hello', 'world'])
         # check that s.split fails when the separator is not a string

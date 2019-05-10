@@ -18,7 +18,7 @@
 #   hooks:
 #   - id: pydocstyle
 
-- repo: https://github.com/pre-commit/mirrors-isort
-  sha: v4.3.4
-  hooks:
-  - id: isort
+# - repo: https://github.com/pre-commit/mirrors-isort
+#   sha: v4.3.4
+#   hooks:
+#   - id: isort
