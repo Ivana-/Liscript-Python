@@ -3,6 +3,7 @@
 import re
 import types  # only if cons/car/cdr done as lambdas
 from enum import Enum
+import readline
 
 # CONS / CAR / CDR
 
@@ -257,7 +258,7 @@ def bo(op, a, b):
 
 def foldbo(op, t, e, d):
     if isnull(t):
-        raise ValueError('no operands for ariphmetic operation: ' + op)
+        raise ValueError('no operands for ariphmetic operation: ' + str(op))
     r, t = evalrec(car(t), e, d, True), cdr(t)
     while not isnull(t):
         r, t = bo(op, r, evalrec(car(t), e, d, True)), cdr(t)
@@ -431,7 +432,7 @@ def evalrec(o, e, stacklevel, strict):
                 return macroexpand(a, cdr(t), e, d) if isinstance(a, Macro) else None
 
             else:
-                raise ValueError('Unrecognized special form \'' + h + '\'')
+                raise ValueError('Unrecognized special form \'' + str(h) + '\'')
                 # return None
 
         elif isinstance(h, Lambda):

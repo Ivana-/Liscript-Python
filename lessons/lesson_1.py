@@ -3,17 +3,18 @@
 import re
 import types  # only if cons/car/cdr done as lambdas
 from enum import Enum
+import readline
 
 # CONS / CAR / CDR
 
 
-# 1-st variant
+# # 1-st variant
 # def cons(x, y): return x, y
 # def car(l):     return l[0]
 # def cdr(l):     return l[1]
 # conslistClass = tuple
 
-# 2-nd variant
+# # 2-nd variant
 # class ConsList:
 #     def __init__(self, x, y): self.car, self.cdr = x, y
 

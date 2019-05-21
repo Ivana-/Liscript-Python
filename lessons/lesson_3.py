@@ -3,6 +3,7 @@
 import re
 import types  # only if cons/car/cdr done as lambdas
 from enum import Enum
+import readline
 
 # CONS / CAR / CDR
 
@@ -245,7 +246,7 @@ def bo(op, a, b):
 
 def foldbo(op, t, e):
     if isnull(t):
-        raise ValueError('no operands for ariphmetic operation: ' + op)
+        raise ValueError('no operands for ariphmetic operation: ' + str(op))
     r, t = evalrec(car(t), e), cdr(t)
     while not isnull(t):
         r, t = bo(op, r, evalrec(car(t), e)), cdr(t)
@@ -392,7 +393,7 @@ def evalrec(o, e):
                 return Lambda(car(t), getBody(cdr(t)), e)
 
             else:
-                raise ValueError('Unrecognized special form \'' + h + '\'')
+                raise ValueError('Unrecognized special form \'' + str(h) + '\'')
 
         elif isinstance(h, Lambda):
             return evalrec(h.body, Env(getMapNamesValues(h.args, t, e, True), h.env))
@@ -421,12 +422,12 @@ def repl():
             o = parse(s)
         except Exception as ex:
             print('PARSING ERROR: ' + str(ex))
-            return
+            continue
         try:
             r = evalrec(o, globalenv)
         except Exception as ex:
             print('EVAL ERROR: ' + str(ex))
-            return
+            continue
         print(show(r))
 
 # repl()
