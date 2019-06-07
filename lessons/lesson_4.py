@@ -9,10 +9,10 @@ import readline
 
 
 # 1-st variant
-# def cons(x, y): return x, y
-# def car(l):     return l[0]
-# def cdr(l):     return l[1]
-# conslistClass = tuple
+def cons(x, y): return x, y
+def car(l):     return l[0]
+def cdr(l):     return l[1]
+conslistClass = tuple
 
 # 2-nd variant
 # class ConsList:
@@ -24,10 +24,10 @@ import readline
 # conslistClass = ConsList
 
 # 3-rd variant
-def cons(x, y): return lambda f: f(x, y)
-def car(l):     return l(lambda x, y: x)
-def cdr(l):     return l(lambda x, y: y)
-conslistClass = types.FunctionType
+# def cons(x, y): return lambda f: f(x, y)
+# def car(l):     return l(lambda x, y: x)
+# def cdr(l):     return l(lambda x, y: y)
+# conslistClass = types.FunctionType
 
 
 # nil is allways the same :)
@@ -250,7 +250,7 @@ def bo(op, a, b):
     if   op == BO.ADD: return a + b
     elif op == BO.SUB: return a - b
     elif op == BO.MUL: return a * b
-    elif op == BO.DIV: return a / b
+    elif op == BO.DIV: return (a // b if isinstance(a, int) and isinstance(b, int) else a / b)
     elif op == BO.MOD: return a % b
     elif op == BO.SCONCAT: return (a if isinstance(a, str) else show(a)) + (b if isinstance(b, str) else show(b))
     else: return None

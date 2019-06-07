@@ -324,7 +324,7 @@
 (defn showField (f)
     (defn go (f)
         (cond (null? f) ""
-          (++ (foldl (lambda (x a) (++ a x " ")) "" (take 9 f)) \n (go (drop 9 f))) ))
+          (++ (foldl (lambda (x a) (++ a (cond (= 0 x) "-" x) " ")) "" (take 9 f)) \n (go (drop 9 f))) ))
     (cond (null? f) "Нет решений" (go f)))
 
 (defn steps (field)
@@ -367,9 +367,9 @@
     (go field))
 
 (defn solve-wide (field)
-    ; (print "Количество анализируемых вариантов: ") ;
+    (print "Количество анализируемых вариантов: ")
     (defn go (vars)
-        ; (print (++ (length vars) " ")) ;
+        (print (++ (length vars) " "))
         (cond (null? vars) nil
               (noelem 0 (car vars)) vars
               (go (concat (map steps vars))) ))
@@ -377,15 +377,15 @@
 
 (read \n "ЗАДАЧА - решение судоку, реализация поиска в глубину и в ширину:" \n
     "Стартовое поле:" \n (showField field) \n
-    "Решение поиском в глубину (расчет займет НЕСКОЛЬКО МИНУТ!)" \n ask-continue)
+    "Решение поиском в глубину (займет пару минут!):" \n
+    ask-continue)
 
-(read \n (showField (solve-depth field)) \n "Поиск в ширину (расчет займет некоторое время)" \n ask-continue)
+(read (showField (solve-depth field))
+    \n "Поиск в ширину займет десяток минут!!!..." \n ask-continue)
 
-(read "А поиск в ширину реализация на Питоне не осиливает (((..." \n ask-continue)
-;
 (def solunions (solve-wide field))
 (read \n "Решения поиском в ширину:" \n
     (cond (null? solunions) (++ "Нет решений" \n)
         (foldl (lambda (x a) (++ a (showField x) \n)) "" solunions) ) \n ask-continue)
-;
+
 (print "Код данных примеров вы можете посмотреть в файле.")

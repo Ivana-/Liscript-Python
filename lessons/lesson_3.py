@@ -238,7 +238,7 @@ def bo(op, a, b):
     if   op == BO.ADD: return a + b
     elif op == BO.SUB: return a - b
     elif op == BO.MUL: return a * b
-    elif op == BO.DIV: return a / b
+    elif op == BO.DIV: return (a // b if isinstance(a, int) and isinstance(b, int) else a / b)
     elif op == BO.MOD: return a % b
     elif op == BO.SCONCAT: return (a if isinstance(a, str) else show(a)) + (b if isinstance(b, str) else show(b))
     else: return None
