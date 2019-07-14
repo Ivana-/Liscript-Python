@@ -1,0 +1,55 @@
+;
+-- f n l | length l <= 1 = (n, l) | otherwise = f n' (filter ((== 0) . (`mod` n')) $ l >>= (\x -> map (\d -> x*10 + d) [0..9])) where n' = n+1
+f n l | length l <= 1 = (n, l) | otherwise = f n' . filter ((0 ==) . (`mod` n')) $ flip map [0..9] . (+) . (10 *) =<< l where n' = n+1
+main = print $ f 1 [1..9]
+;
+
+(defn concat (l)
+  (defn go (l a) cond (null? l) a (go (cdr l) (append (car l) a)))
+  (go l nil))
+
+
+
+(def ds (list-from-to 0 9))
+
+(defn add-digits (n) map (lambda (d) + (* 10 n) d) ds)
+
+
+(defn filter-set (f l)
+    (defn go (l a) cond (null? l) a
+                        (f (car l)) (go (cdr l) (cons (car l) a))
+                        (go (cdr l) a))
+    (go l nil))
+
+(defn append-set (l1 l2) cond (null? l1) l2 (append-set (cdr l1) (cons (car l1) l2)))
+
+(defn mapcat (f l)
+    (defn go (l a) cond (null? l) a (go (cdr l) (append-set (f (car l)) a)))
+    (go l nil))
+
+(defn f (n l)
+    (print n ": " (length l))
+    ; (print n) ;
+    (cond
+        (null? (cdr l)) (id n l)
+        (f (+ n 1) (filter-set (lambda (x) = 0 (mod x (+ n 1))) (mapcat add-digits l)))))
+
+; (f 1 (list-from-to 1 9)) ;
+
+;
+(defn g (n r)
+    (def rs (filter-set (lambda (x) and (= 0 (mod x (+ n 1))) (> x 0)) (add-digits r)))
+    (cond (null? rs) (id n r) (foldl (lambda (x a) cond (> (cadr x) (cadr a)) x a)
+                                    '(0 0)
+                                    (map (lambda (x) g (+ 1 n) x) rs))))
+
+(g 0 0)
+;
+
+(defn maximum (l) foldl (lambda (x a) cond (> x a) x a) 0 l)
+
+(defn g (n r)
+    (def rs (filter-set (lambda (x) = 0 (mod x (+ n 1))) (add-digits r)))
+    (cond (null? rs) r (maximum (map (lambda (x) g (+ 1 n) x) rs))))
+
+(maximum (map (lambda (x) (def r (g 1 x)) (print x ": " r) r) (list-from-to 1 9)))
